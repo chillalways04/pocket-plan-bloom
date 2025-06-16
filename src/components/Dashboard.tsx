@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
-import { PlusCircle, Target, TrendingUp, Wallet, RotateCcw } from 'lucide-react';
+import { PlusCircle, Target, TrendingUp, Wallet, RotateCcw, LogOut, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 import TransactionForm from './TransactionForm';
 import GoalsSection from './GoalsSection';
 import SpendingChart from './SpendingChart';
@@ -32,6 +32,7 @@ interface Goal {
 }
 
 const Dashboard = () => {
+  const { user, logout } = useAuth();
   const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -65,10 +66,27 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-6xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center py-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Personal Finance Tracker</h1>
-          <p className="text-gray-600">Take control of your financial future</p>
+        {/* Header with User Info */}
+        <div className="flex justify-between items-center py-6">
+          <div className="text-center flex-1">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">Personal Finance Tracker</h1>
+            <p className="text-gray-600">Take control of your financial future</p>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 bg-white px-4 py-2 rounded-lg shadow">
+              <User className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">{user?.name}</span>
+            </div>
+            <Button 
+              onClick={logout}
+              variant="outline"
+              className="text-red-600 border-red-200 hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Logout
+            </Button>
+          </div>
         </div>
 
         {/* Overview Cards */}
