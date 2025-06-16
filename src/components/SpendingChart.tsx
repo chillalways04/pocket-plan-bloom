@@ -2,7 +2,24 @@
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const SpendingChart = ({ transactions }) => {
+interface Transaction {
+  id: number;
+  type: 'income' | 'expense';
+  amount: number;
+  category: {
+    name: string;
+    icon: string;
+    color: string;
+  };
+  description?: string;
+  date: Date;
+}
+
+interface SpendingChartProps {
+  transactions: Transaction[];
+}
+
+const SpendingChart: React.FC<SpendingChartProps> = ({ transactions }) => {
   const expenseTransactions = transactions.filter(t => t.type === 'expense');
   
   if (expenseTransactions.length === 0) {
@@ -19,12 +36,14 @@ const SpendingChart = ({ transactions }) => {
     const categoryName = transaction.category.name;
     acc[categoryName] = (acc[categoryName] || 0) + transaction.amount;
     return acc;
-  }, {});
+  }, {} as Record<string, number>);
+
+  const totalExpenses = expenseTransactions.reduce((sum, t) => sum + t.amount, 0);
 
   const chartData = Object.entries(categoryTotals).map(([name, value]) => ({
     name,
     value,
-    percentage: ((value / expenseTransactions.reduce((sum, t) => sum + t.amount, 0)) * 100).toFixed(1)
+    percentage: ((value / totalExpenses) * 100).toFixed(1)
   }));
 
   const COLORS = {
@@ -34,9 +53,9 @@ const SpendingChart = ({ transactions }) => {
     'Utilities': '#F59E0B',
     'Entertainment': '#10B981',
     'Other': '#6B7280'
-  };
+  } as Record<string, string>;
 
-  const CustomTooltip = ({ active, payload }) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: any[] }) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
@@ -73,7 +92,7 @@ const SpendingChart = ({ transactions }) => {
             height={36}
             formatter={(value, entry) => (
               <span style={{ color: entry.color }}>
-                {value} (฿{entry.payload.value.toLocaleString()})
+                {value} (฿{entry.payload?.value?.toLocaleString()})
               </span>
             )}
           />

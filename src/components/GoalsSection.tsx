@@ -6,22 +6,39 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 
-const GoalsSection = ({ goals, onAddGoal }) => {
+interface Goal {
+  id: number;
+  name: string;
+  targetAmount: number;
+  targetMonths: number;
+  monthlyTarget: number;
+  saved: number;
+  createdAt: Date;
+}
+
+interface GoalsSectionProps {
+  goals: Goal[];
+  onAddGoal: (goal: Omit<Goal, 'id' | 'saved'>) => void;
+}
+
+const GoalsSection: React.FC<GoalsSectionProps> = ({ goals, onAddGoal }) => {
   const [showForm, setShowForm] = useState(false);
   const [goalName, setGoalName] = useState('');
   const [targetAmount, setTargetAmount] = useState('');
   const [targetMonths, setTargetMonths] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!goalName || !targetAmount || !targetMonths) return;
 
-    const monthlyTarget = parseFloat(targetAmount) / parseInt(targetMonths);
+    const targetAmountNum = parseFloat(targetAmount);
+    const targetMonthsNum = parseInt(targetMonths);
+    const monthlyTarget = targetAmountNum / targetMonthsNum;
     
     onAddGoal({
       name: goalName,
-      targetAmount: parseFloat(targetAmount),
-      targetMonths: parseInt(targetMonths),
+      targetAmount: targetAmountNum,
+      targetMonths: targetMonthsNum,
       monthlyTarget: monthlyTarget,
       createdAt: new Date()
     });
@@ -126,7 +143,7 @@ const GoalsSection = ({ goals, onAddGoal }) => {
               {targetAmount && targetMonths && (
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <p className="text-sm text-blue-800">
-                    You'll need to save <strong>฿{Math.round(targetAmount / targetMonths).toLocaleString()}</strong> per month
+                    You'll need to save <strong>฿{Math.round(parseFloat(targetAmount) / parseInt(targetMonths)).toLocaleString()}</strong> per month
                   </p>
                 </div>
               )}

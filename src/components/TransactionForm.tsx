@@ -24,18 +24,37 @@ const categories = {
   ]
 };
 
-const TransactionForm = ({ onSubmit, onCancel }) => {
-  const [type, setType] = useState('expense');
+interface Transaction {
+  type: 'income' | 'expense';
+  amount: number;
+  category: {
+    id: string;
+    name: string;
+    icon: string;
+    color: string;
+  };
+  description?: string;
+  date: Date;
+}
+
+interface TransactionFormProps {
+  onSubmit: (transaction: Transaction) => void;
+  onCancel: () => void;
+}
+
+const TransactionForm: React.FC<TransactionFormProps> = ({ onSubmit, onCancel }) => {
+  const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !category) return;
 
     const selectedCategory = categories[type].find(c => c.id === category);
+    if (!selectedCategory) return;
     
     onSubmit({
       type,
@@ -64,7 +83,7 @@ const TransactionForm = ({ onSubmit, onCancel }) => {
       {/* Transaction Type */}
       <div className="space-y-3">
         <Label className="text-sm font-medium text-gray-700">Transaction Type</Label>
-        <RadioGroup value={type} onValueChange={setType} className="flex space-x-4">
+        <RadioGroup value={type} onValueChange={(value: 'income' | 'expense') => setType(value)} className="flex space-x-4">
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="expense" id="expense" />
             <Label htmlFor="expense" className="text-red-600 font-medium">Expense</Label>

@@ -2,7 +2,24 @@
 import React from 'react';
 import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 
-const TransactionList = ({ transactions }) => {
+interface Transaction {
+  id: number;
+  type: 'income' | 'expense';
+  amount: number;
+  category: {
+    name: string;
+    icon: string;
+    color: string;
+  };
+  description?: string;
+  date: Date;
+}
+
+interface TransactionListProps {
+  transactions: Transaction[];
+}
+
+const TransactionList: React.FC<TransactionListProps> = ({ transactions }) => {
   if (transactions.length === 0) {
     return (
       <div className="text-center py-8">
@@ -12,7 +29,7 @@ const TransactionList = ({ transactions }) => {
     );
   }
 
-  const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date) - new Date(a.date));
+  const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   return (
     <div className="space-y-3">

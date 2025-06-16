@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PlusCircle, Target, TrendingUp, Wallet } from 'lucide-react';
+import { PlusCircle, Target, TrendingUp, Wallet, RotateCcw } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import TransactionForm from './TransactionForm';
@@ -8,10 +8,34 @@ import GoalsSection from './GoalsSection';
 import SpendingChart from './SpendingChart';
 import TransactionList from './TransactionList';
 
+interface Transaction {
+  id: number;
+  type: 'income' | 'expense';
+  amount: number;
+  category: {
+    name: string;
+    icon: string;
+    color: string;
+  };
+  description?: string;
+  date: Date;
+}
+
+interface Goal {
+  id: number;
+  name: string;
+  targetAmount: number;
+  targetMonths: number;
+  monthlyTarget: number;
+  saved: number;
+  createdAt: Date;
+}
+
 const Dashboard = () => {
   const [showTransactionForm, setShowTransactionForm] = useState(false);
-  const [transactions, setTransactions] = useState([]);
-  const [goals, setGoals] = useState([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const totalIncome = transactions
     .filter(t => t.type === 'income')
@@ -23,13 +47,19 @@ const Dashboard = () => {
 
   const balance = totalIncome - totalExpenses;
 
-  const addTransaction = (transaction) => {
+  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     setTransactions([...transactions, { ...transaction, id: Date.now() }]);
     setShowTransactionForm(false);
   };
 
-  const addGoal = (goal) => {
+  const addGoal = (goal: Omit<Goal, 'id' | 'saved'>) => {
     setGoals([...goals, { ...goal, id: Date.now(), saved: 0 }]);
+  };
+
+  const resetAllData = () => {
+    setTransactions([]);
+    setGoals([]);
+    setShowResetConfirm(false);
   };
 
   return (
@@ -92,6 +122,15 @@ const Dashboard = () => {
             <PlusCircle className="w-4 h-4 mr-2" />
             Add Transaction
           </Button>
+          
+          <Button 
+            onClick={() => setShowResetConfirm(true)}
+            variant="outline"
+            className="border-red-200 text-red-600 hover:bg-red-50 px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all"
+          >
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Reset All Data
+          </Button>
         </div>
 
         {/* Main Content Grid */}
@@ -135,6 +174,36 @@ const Dashboard = () => {
                 onSubmit={addTransaction}
                 onCancel={() => setShowTransactionForm(false)}
               />
+            </div>
+          </div>
+        )}
+
+        {/* Reset Confirmation Modal */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <div className="text-center">
+                <RotateCcw className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">Reset All Financial Data</h3>
+                <p className="text-gray-600 mb-6">
+                  This will permanently delete all your transactions and savings goals. This action cannot be undone.
+                </p>
+                <div className="flex space-x-3">
+                  <Button 
+                    onClick={resetAllData}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    Yes, Reset All
+                  </Button>
+                  <Button 
+                    onClick={() => setShowResetConfirm(false)}
+                    variant="outline" 
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         )}
