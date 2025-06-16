@@ -26,16 +26,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthProvider: Checking for saved user...');
     // Check if user is logged in on app start
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
+      console.log('AuthProvider: Found saved user:', savedUser);
       setUser(JSON.parse(savedUser));
+    } else {
+      console.log('AuthProvider: No saved user found');
     }
     setIsLoading(false);
   }, []);
 
   const signup = async (name: string, email: string, password: string): Promise<boolean> => {
     try {
+      console.log('AuthProvider: Starting signup for:', email);
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
@@ -44,6 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const userExists = existingUsers.find((u: any) => u.email === email);
       
       if (userExists) {
+        console.log('AuthProvider: User already exists:', email);
         throw new Error('User already exists');
       }
 
@@ -57,26 +63,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Save user to localStorage (simulating database)
       const users = [...existingUsers, { ...newUser, password }];
       localStorage.setItem('users', JSON.stringify(users));
+      console.log('AuthProvider: User saved to localStorage:', newUser);
       
       // Set current user
       setUser(newUser);
       localStorage.setItem('user', JSON.stringify(newUser));
+      console.log('AuthProvider: Signup successful for:', email);
       
       return true;
     } catch (error) {
+      console.log('AuthProvider: Signup failed:', error);
       return false;
     }
   };
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('AuthProvider: Starting login for:', email);
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       const users = JSON.parse(localStorage.getItem('users') || '[]');
+      console.log('AuthProvider: Checking against users:', users.length);
       const foundUser = users.find((u: any) => u.email === email && u.password === password);
       
       if (!foundUser) {
+        console.log('AuthProvider: Invalid credentials for:', email);
         throw new Error('Invalid credentials');
       }
 
@@ -88,14 +100,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setUser(user);
       localStorage.setItem('user', JSON.stringify(user));
+      console.log('AuthProvider: Login successful for:', email);
       
       return true;
     } catch (error) {
+      console.log('AuthProvider: Login failed:', error);
       return false;
     }
   };
 
   const logout = () => {
+    console.log('AuthProvider: Logging out user');
     setUser(null);
     localStorage.removeItem('user');
   };
@@ -107,6 +122,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isLoading
   };
+
+  console.log('AuthProvider: Current user state:', user);
 
   return (
     <AuthContext.Provider value={value}>
