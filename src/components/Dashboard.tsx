@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { PlusCircle, Target, TrendingUp, Wallet, RotateCcw, LogOut, User } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +50,33 @@ const Dashboard = () => {
   const balance = totalIncome - totalExpenses;
 
   const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
-    setTransactions([...transactions, { ...transaction, id: Date.now() }]);
+    const newTransaction = { ...transaction, id: Date.now() };
+    setTransactions([...transactions, newTransaction]);
+    
+    // If it's income, automatically allocate towards savings goals
+    if (transaction.type === 'income' && goals.length > 0) {
+      const incomeAmount = transaction.amount;
+      const totalMonthlyTargets = goals.reduce((sum, goal) => sum + goal.monthlyTarget, 0);
+      
+      if (totalMonthlyTargets > 0) {
+        setGoals(prevGoals => 
+          prevGoals.map(goal => {
+            // Calculate proportional allocation based on monthly target
+            const allocationRatio = goal.monthlyTarget / totalMonthlyTargets;
+            const allocation = Math.min(
+              incomeAmount * allocationRatio,
+              goal.targetAmount - goal.saved // Don't exceed target
+            );
+            
+            return {
+              ...goal,
+              saved: Math.min(goal.saved + allocation, goal.targetAmount)
+            };
+          })
+        );
+      }
+    }
+    
     setShowTransactionForm(false);
   };
 

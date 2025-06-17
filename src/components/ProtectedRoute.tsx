@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -21,17 +22,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!user) {
-    // Use React Router's navigate instead of window.location
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Please log in to access this page</p>
-          <a href="/auth" className="text-blue-600 hover:text-blue-700 underline">
-            Go to Login
-          </a>
-        </div>
-      </div>
-    );
+    return <Navigate to="/auth" replace />;
   }
 
   return <>{children}</>;
